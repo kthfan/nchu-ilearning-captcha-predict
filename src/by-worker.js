@@ -114,17 +114,21 @@ if(document.readyState === "complete" || document.readyState === "interactive") 
 async function main(){
 	const captchaElem = document.getElementsByClassName("fs-form-captcha-field")[0];
 	const refreshBn = document.getElementsByClassName("js-refresh-captcha")[0];
+	const submitBn = document.getElementsByClassName("btn btn-primary btn-lg btn-block")[0];
+	
 	var worker = new Worker(window.URL.createObjectURL(workerBlob));
+	
 	worker.onmessage  = e =>{
 		captchaElem.value = e.data;
+		if(checkCapthaError()) submitBn.click();
 	}
 	
-	document.getElementsByClassName("js-captcha")[0].onload = function(){
+	document.getElementsByClassName("js-captcha")[0].addEventListener("load", function(){
 		refreshCaptcha();
-	}	
+	});
 	setTimeout(refreshCaptcha, 1);
 	
-	async function refreshCaptcha(){
+	function refreshCaptcha(){
 		let I = document.getElementsByClassName("js-captcha")[0];
 		let canvas = document.createElement("canvas");
 		canvas.height = I.naturalHeight;
@@ -135,6 +139,17 @@ async function main(){
 		let data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 		worker.postMessage(data);
 		
+	}
+	
+	function checkCapthaError(){
+		return document.getElementsByClassName("help-block").length ==1 &&
+			Array.from(document.getElementsByClassName("help-block")).some(elem=>{
+			  if(elem.childNodes[0] && elem.childNodes[0].childNodes[1]){
+				elem = elem.childNodes[0].childNodes[1];
+				return elem.textContent.indexOf("驗證碼") !== -1;
+			  }
+			  return false;
+			})
 	}
 }
 
