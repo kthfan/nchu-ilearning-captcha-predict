@@ -116,6 +116,8 @@ async function main(){
 	const refreshBn = document.getElementsByClassName("js-refresh-captcha")[0];
 	const submitBn = document.getElementsByClassName("btn btn-primary btn-lg btn-block")[0];
 	
+	if(!captchaElem) return;
+	
 	var worker = new Worker(window.URL.createObjectURL(workerBlob));
 	
 	worker.onmessage  = e =>{

@@ -12,6 +12,8 @@ async function main(){
 	const refreshBn = document.getElementsByClassName("js-refresh-captcha")[0];
 	const submitBn = document.getElementsByClassName("btn btn-primary btn-lg btn-block")[0];
 	
+	if(!captchaElem) return;
+	
 	var model = null;
 	Promise.all([
 		load_js("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js")
