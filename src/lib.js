@@ -15,6 +15,7 @@ function load_js(src){
 	script.onload = () => {
 		//clearTimeout(timdId);
 		ok();
+		
 	}
 	return promise;
 }
@@ -30,31 +31,27 @@ function convertByColor(I){
 	// for(let i=2; i<len; i+=4){
 	// 	if(I.data[i] >= 150) I.data[i] = 255;
 	// }
-	cv.cvtColor(I, I, cv.COLOR_RGB2GRAY);
-    cv.threshold(I, I, 100, 255, cv.THRESH_BINARY_INV);
+	I = I.neg().add(255);
+	I = tf.mean(I, 2);
+	I = tf.cast(I.greater(160), "float32");
     return I;
 }
 
 function splitImage(I){
-	let tmp = I;
-	I = tf.tensor(I.data, [I.rows, I.cols]);
-	tmp.delete();
+	
 	I = tf.slice(I, [3, 11], [20, 79]);
 	let [h, w] = I.shape;
 	let w2 = Number.parseInt(w/6);
-	let s = new cv.Scalar(0, 0, 0, 255);
 	let result = Array.from(Array(6))
 		.map((_, i) => tf.slice(I, [0, i*w2], [I.shape[0], w2]))
-		.map(img => cv.matFromArray(img.shape[0], img.shape[1], cv.CV_8U, img.dataSync()))
-		.map(img => (cv.copyMakeBorder(img, img, 4,4,7,8, cv.BORDER_CONSTANT, s), img));
+		.map(img => tf.pad(img, [[4,4],[7,8]]));
 	
 	return result
 }
 function imagesToTensors(image_list){
-	var result = image_list
-		.map(img => tf.tensor(img.data, [1, img.rows, img.cols, 1]));
-	image_list.forEach(img => img.delete());
-	return tf.concat(result, 0);
+	var result = tf.concat(image_list, 0);
+	result = result.reshape([image_list.length, 28, 28, 1]);
+	return result;
 }
 function loadWeights(model, weights){
 	weights = weights.map(w => tf.tensor(w));
@@ -82,7 +79,7 @@ function build_model(){
 }
 
 function predict(model, imgElem){
-	let I = cv.imread(imgElem);
+	let I = tf.browser.fromPixels(imgElem);
 	I = convertByColor(I);
 	let images = splitImage(I);
 	let tensors = imagesToTensors(images);

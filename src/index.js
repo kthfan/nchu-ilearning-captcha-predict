@@ -12,7 +12,6 @@ async function main(){
 	const refreshBn = document.getElementsByClassName("js-refresh-captcha")[0];
 	var model = null;
 	Promise.all([
-		load_js("https://docs.opencv.org/4.2.0/opencv.js"),
 		load_js("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js")
 	]).then(() => {
 		model = build_model();
@@ -22,7 +21,7 @@ async function main(){
 			refreshCaptcha();
 		}
 		
-		setTimeout(refreshCaptcha, 1000);
+		setTimeout(refreshCaptcha, 1);
 	});
 	
 	async function refreshCaptcha(){
@@ -31,7 +30,7 @@ async function main(){
 			captchaElem.value = predict(model, document.getElementsByClassName("js-captcha")[0]);
 		}catch(e){
 			console.error(e);
-			setTimeout(refreshCaptcha, 500);
+			// setTimeout(refreshCaptcha, 500);
 		}
 		tf.engine().endScope();
 	}
